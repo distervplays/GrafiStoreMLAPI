@@ -7,7 +7,10 @@ class TaskCards(Database):
         super().__init__(username, password)
         self.collection = self.get_collection('task_cards')
         
-    def insert_taskcards(self, task_card: list) -> list[ObjectId]:
+    def insert(self, task_card: dict) -> ObjectId:
+        return self.collection.insert_one(task_card).inserted_id
+        
+    def insert_many(self, task_card: list) -> list[ObjectId]:
         return self.collection.insert_many(task_card).inserted_ids
         
     def find(self, filter: dict) -> dict:
@@ -16,5 +19,5 @@ class TaskCards(Database):
     def find_many(self, filter: dict) -> list:
         return list(self.collection.find(filter)) if self.collection.find(filter) else []
         
-    def get_tasks(self) -> list:
+    def get_all(self) -> list:
         return list(self.collection.find({})) if self.collection.find({}) else None

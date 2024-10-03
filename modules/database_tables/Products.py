@@ -7,10 +7,10 @@ class Products(Database):
         super().__init__(username, password)
         self.collection = self.get_collection('products')
         
-    def insert_product(self, product: dict) -> ObjectId:
+    def insert(self, product: dict) -> ObjectId:
         return self.collection.insert_one(product).inserted_id
     
-    def insert_products(self, products: list[dict]) -> list[ObjectId]:
+    def insert_many(self, products: list[dict]) -> list[ObjectId]:
         return self.collection.insert_many(products).inserted_ids
         
     def find(self, filter: dict) -> dict:
@@ -19,5 +19,5 @@ class Products(Database):
     def find_many(self, filter: dict) -> list:
         return list(self.collection.find(filter)) if self.collection.find(filter) else []
         
-    def get_products(self) -> list:
+    def get_all(self) -> list:
         return list(self.collection.find({})) if self.collection.find({}) else None
