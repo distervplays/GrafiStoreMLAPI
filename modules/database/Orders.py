@@ -1,6 +1,7 @@
 from . import Database
 from pymongo import InsertOne
 from bson import ObjectId
+from .Products import Products
 
 
 class Orders(Database):
