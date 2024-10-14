@@ -193,6 +193,7 @@ class Model:
 
         # Sort adjusted predictions by start time, in case rescheduled tasks were added later
         adjusted_pred.sort(key=lambda x: x['start_at'])
+        
         return adjusted_pred
         
     def predict(self, X: np.ndarray, order_created_at_list: list[datetime], task_duration_list: list[float|int], product_operation_id_list:list[int], scaler=None) -> np.ndarray:
