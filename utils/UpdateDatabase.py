@@ -16,7 +16,7 @@ load_dotenv()
 
 
 api = PremoAPI()
-api.learning_days = 7
+api.learning_days = 7000
 data = api.learn_data
 
 username = os.getenv("mongodb_user")
