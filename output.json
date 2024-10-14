@@ -3,7 +3,7 @@
         "product_operation_id": 1,
         "task_duration_x": 3600.0,
         "start_at": "2024-07-01T09:00:00.000",
-        "end_at": "2024-07-01T10:00:00.000",
+        "end_at": "2024-07-02T10:00:00.000",
         "order_created_at_x": "2024-07-08T14:28:51.000",
         "order_id": 1,
         "delivery_date": "2024-07-13T14:28:51.000",
