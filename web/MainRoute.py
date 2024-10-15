@@ -3,7 +3,8 @@ from Helpers.DataPreProcessing import preprocess_data
 from utils.FlattenData import flatten_input
 from utils.UpdateDatabase import update_database
 from sklearn.model_selection import train_test_split
-from . import api, agent
+from . import api, agent, db, orders, products, operations, taskcards
+from pymongo import MongoClient
 import threading
 
 views = Blueprint(
@@ -38,23 +39,6 @@ def home():
             return {'message': 'An error occurred!'}
     return {'message': 'Welcome to the Premo API!'}
 
-@views.route('/play_data')
-def flat_data():
-    """
-    Flattens the play data and returns it as a JSON response.
-    This function retrieves play data from the API, flattens it using the `flatten_input` function, 
-    and then returns the flattened data as a JSON response using Flask's `jsonify`.
-    
-    Usage:
-        This function is typically used in a Flask route to process and return play data in a flattened format.
-        
-    Returns:
-        Response: A Flask `jsonify` response containing the flattened play data.
-    """
-    
-    flat_play: list[dict] = flatten_input(api.play_data)
-    return jsonify(flat_play)
-
 @views.route('/train', methods=['POST', 'GET'])
 def train():
     """
@@ -64,7 +48,7 @@ def train():
     and evaluation respectively.
     
     - For POST requests:
-        - Sets the training parameters (number of epochs, batch size, learning rate, penalty factor) from the request JSON.
+        - Sets the training parameters (number of epochs, batch size, learning rate, verbose) from the request JSON.
         - Starts the training process in a separate thread to avoid blocking.
         
     - For GET requests:
@@ -85,7 +69,7 @@ def train():
         agent.num_epochs = request.json.get('num_epochs', 100)
         agent.batch_size = request.json.get('batch_size', 16)
         agent.learning_rate = request.json.get('learning_rate', 0.001)
-        agent.penalty_factor = request.json.get('penalty_factor', 0.5)
+        agent.verbose = request.json.get('verbose', 0)
         
         def train_model():
             agent.train(X_train, y_train, X_test, y_test)
@@ -102,6 +86,149 @@ def train():
             return {'loss': loss}
         except:
             return {'message': 'Model not trained yet!'}
-
+        
+@views.route('/database', methods=['GET', 'POST', 'DELETE', 'PUT'])
+def database_handler():
+    """Handles database operations for different HTTP request methods.
     
+    GET:
+        Retrieves all records from the specified table.
+        - Query Parameters:
+            - table (str): The name of the table to retrieve records from.
+                           valid values: 'orders', 'products', 'operations', 'taskcards'
+        - Returns:
+            - JSON response containing the records with ObjectIds converted to strings and renamed fields.
+            
+    POST:
+        Inserts a new record into the specified table.
+        - JSON Body:
+            - to_table (str): The name of the table to insert the record into.
+            - Other fields as required by the table schema.
+        - Returns:
+            - JSON response indicating success and the index of the inserted record.
+            
+    DELETE:
+        Deletes a record from the specified table.
+        - JSON Body:
+            - from_table (str): The name of the table to delete the record from.
+            - idx (str): The index of the record to delete.
+        - Returns:
+            - JSON response indicating success and the index of the deleted record.
+            
+    PUT:
+        Updates a record in the specified table.
+        - JSON Body:
+            - from_table (str): The name of the table to update the record in.
+            - idx (str): The index of the record to update.
+            - update (dict): The fields to update with their new values.
+        - Returns:
+            - JSON response indicating success and the index of the updated record.
+            
+    Returns:
+        - JSON response indicating an invalid request method if the method is not GET, POST, DELETE, or PUT.
+    """
+    
+    if request.method == 'GET':
+        fromTable = request.args.get('table', None)
+        if not fromTable: return {'message': 'No table specified!', 'status': 400}
+        
+        table_classes = {
+            'orders': orders,
+            'products': products,
+            'operations': operations,
+            'taskcards': taskcards
+        }
+        
+        if not fromTable in table_classes:
+            return {'message': 'Invalid table specified!', 'status': 400}
+        table = table_classes[fromTable]
+        
+        # Convert ObjectIds to strings for JSON serialization
+        table_dict: list[dict] = table.get_all()
+        for record in table_dict:
+            record['_id'] = str(record['_id'])
+            
+            # Convert order_id and product_id to strings for JSON serialization
+            if fromTable == 'products':
+                record['order_id'] = str(record['order_id'])
+            if fromTable in ['operations', 'taskcards']:
+                record['product_id'] = str(record['product_id'])
+        
+        # Rename the _id fields to idx for consistency
+        table_dict = [{'idx': record.pop('_id'), **record} for record in table_dict]
+        
+        if fromTable == 'products':
+            table_dict = [{'order_idx': record.pop('order_id'), **record} for record in table_dict] 
+        if fromTable in ['operations', 'taskcards']:
+            table_dict = [{'product_idx': record.pop('product_id'), **record} for record in table_dict] 
+        
+        return jsonify(table_dict)
+    
+    if request.method == 'POST':
+        data = request.json
+        to_table = data.get('to_table', None)
+        
+        if not to_table: 
+            return {'message': 'No table specified!', 'status': 400}
+        
+        table_classes = {
+            'orders': orders,
+            'products': products,
+            'operations': operations,
+            'taskcards': taskcards
+        }
+        
+        if not to_table in table_classes:
+            return {'message': 'Invalid table specified!', 'status': 400}
+        table = table_classes[to_table]
+        idx = table.insert(data)
+        return {'message': f'Data added successfully! (Index: {idx})'}
+    
+    if request.method == 'DELETE':
+        data = request.json
+        from_table = data.get('from_table', None)
+        idx = data.get('idx', None)
+        
+        if not from_table: return {'message': 'No table specified!', 'status': 400}
+        if not idx: return {'message': 'No index specified!', 'status': 400}
+        
+        table_classes = {
+            'orders': orders.collection,
+            'products': products.collection,
+            'operations': operations.collection,
+            'taskcards': taskcards.collection
+        }
+        
+        if not from_table in table_classes:
+            return {'message': 'Invalid table specified!', 'status': 400}
+        collection: MongoClient = table_classes[from_table]
+        collection.delete_one({'_id': idx})
+        
+        return {'message': f'Data deleted successfully! (Index: {idx})'}
+    
+    if request.method == 'PUT':
+        data = request.json
+        from_table = data.get('from_table', None)
+        idx = data.get('idx', None)
+        update = data.get('update', None)
+        
+        if not from_table: return {'message': 'No table specified!', 'status': 400}
+        if not idx: return {'message': 'No index specified!', 'status': 400}
+        if not update: return {'message': 'No update specified!', 'status': 400}
+        
+        table_classes = {
+            'orders': orders.collection,
+            'products': products.collection,
+            'operations': operations.collection,
+            'taskcards': taskcards.collection
+        }
+        
+        if not from_table in table_classes:
+            return {'message': 'Invalid table specified!', 'status': 400}
+        collection: MongoClient = table_classes[from_table]
+        collection.update_one({'_id': idx}, {'$set': update})
+        
+        return {'message': f'Data updated successfully! (Index: {idx})'}
+    
+    return {'message': 'Invalid request method!', 'status': 400}
     

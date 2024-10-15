@@ -108,7 +108,7 @@ class Model:
         
         model = NeuralNet(self.input_size, self.output_size)
         optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
-        model.compile(optimizer=optimizer, loss=custom_loss(self.penalty_factor))
+        model.compile(optimizer=optimizer, loss=custom_loss())
         self.load_weights()
         return model
     
