@@ -80,6 +80,7 @@ class Model:
             learning_rate (float): The learning rate for the optimizer.
             input_size (int): The number of input features.
             output_size (int): The number of output features (date offset and start time).
+            verbose (int): Verbosity mode for training. 0=silent, 1=progress bar, 2=one line per epoch.
             model_path (str or None): The directory path to save/load model weights.
             model (tf.keras.Model or None): The neural network model instance.
         """
@@ -90,6 +91,7 @@ class Model:
         self.learning_rate: float = 0.001
         self.input_size: int = 0
         self.output_size: int = 2  # Predicting date offset and start time
+        self.verbose: int = 0 # Verbosity mode -> 0: silent, 1: progress bar, 2: one line per epoch
         self.model_path = None
         self.model = None
         
@@ -184,7 +186,7 @@ class Model:
             X_train, y_train,
             batch_size=self.batch_size,
             epochs=self.num_epochs,
-            verbose=1,
+            verbose=self.verbose,
             validation_data=(X_val, y_val),
             callbacks=[self.__callback()]
         )

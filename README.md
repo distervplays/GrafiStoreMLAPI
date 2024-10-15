@@ -5,27 +5,97 @@
 GrafiStoreMLPreAPI is a machine learning-based API designed to interact with the Premo API, preprocess data, and update a MongoDB database. It also includes functionalities for training and evaluating machine learning models.
 
 ## Project Structure
-```
+```plaintext
+GrafiStoreMLPreAPI/
 ├── Helpers/
-│   └── DataPreProcessing.py
-├── LICENSE
-├── main.py
-├── model.py
+│   └── DataPreProcessing.py   # Handles data cleaning and preprocessing tasks
+├── LICENSE                    # License file
+├── main.py                    # Main script to run the application
+├── model.py                   # Script for machine learning model
 ├── modules/
-│   ├── database/
-│   ├── ColumnTransformer.py
-│   └── PremoAPI.py
-├── README.md
-├── requirements.txt
+│   ├── database/              # Contains database-related scripts
+│   ├── ColumnTransformer.py   # Transforms data columns for model input
+│   └── PremoAPI.py            # Interacts with the Premo API to fetch data
+├── README.md                  # Project documentation
+├── requirements.txt           # List of dependencies
 ├── utils/
-│   ├── FlattenData.py
-│   ├── SafeDataConverters.py
-│   └── UpdateDatabase.py
+│   ├── FlattenData.py         # Flattens nested data structures
+│   ├── SafeDataConverters.py  # Converts data safely between formats
+│   └── UpdateDatabase.py      # Updates the MongoDB database with new data
 └── web/
-    ├── __init__.py
-    ├── CalendarRoute.py
-    └── MainRoute.py
+    ├── __init__.py            # Initializes the web module
+    ├── CalendarRoute.py       # Handles calendar-related API routes
+    └── MainRoute.py           # Handles the main API routes
 ```
+
+## Detailed Project Structure
+
+```plaintext
+GrafiStoreMLPreAPI/
+├── Helpers/
+│   └── DataPreProcessing.py   # Handles data cleaning and preprocessing tasks
+├── LICENSE                    # License file
+├── main.py                    # Main script to run the application
+├── model.py                   # Script for machine learning model
+├── modules/
+│   ├── database/              # Contains database-related scripts
+│   ├── ColumnTransformer.py   # Transforms data columns for model input
+│   └── PremoAPI.py            # Interacts with the Premo API to fetch data
+├── README.md                  # Project documentation
+├── requirements.txt           # List of dependencies
+├── utils/
+│   ├── FlattenData.py         # Flattens nested data structures
+│   ├── SafeDataConverters.py  # Converts data safely between formats
+│   └── UpdateDatabase.py      # Updates the MongoDB database with new data
+└── web/
+    ├── __init__.py            # Initializes the web module
+    ├── CalendarRoute.py       # Handles calendar-related API routes
+    └── MainRoute.py           # Handles the main API routes
+```
+
+### Helpers
+Contains scripts for data preprocessing and other helper functions.
+- **DataPreProcessing.py**: Handles data cleaning and preprocessing tasks.
+
+### Modules
+Includes core modules for database interaction and API communication.
+- **database/**: Contains database-related scripts.
+- **ColumnTransformer.py**: Transforms data columns for model input.
+- **PremoAPI.py**: Interacts with the Premo API to fetch data.
+
+### Utils
+Utility scripts for various tasks.
+- **FlattenData.py**: Flattens nested data structures.
+- **SafeDataConverters.py**: Converts data safely between formats.
+- **UpdateDatabase.py**: Updates the MongoDB database with new data.
+
+### Web
+Contains web route handlers for the API.
+- **__init__.py**: Initializes the web module.
+- **CalendarRoute.py**: Handles calendar-related API routes.
+- **MainRoute.py**: Handles the main API routes.
+
+### Helpers
+Contains scripts for data preprocessing and other helper functions.
+- **DataPreProcessing.py**: Handles data cleaning and preprocessing tasks.
+
+### Modules
+Includes core modules for database interaction and API communication.
+- **database/**: Contains database-related scripts.
+- **ColumnTransformer.py**: Transforms data columns for model input.
+- **PremoAPI.py**: Interacts with the Premo API to fetch data.
+
+### Utils
+Utility scripts for various tasks.
+- **FlattenData.py**: Flattens nested data structures.
+- **SafeDataConverters.py**: Converts data safely between formats.
+- **UpdateDatabase.py**: Updates the MongoDB database with new data.
+
+### Web
+Contains web route handlers for the API.
+- **__init__.py**: Initializes the web module.
+- **CalendarRoute.py**: Handles calendar-related API routes.
+- **MainRoute.py**: Handles the main API routes.
 
 
 ## Installation
